@@ -51,4 +51,4 @@ bin/
 obj/
 *.suo
 publish/
-/.vs/MIA/v15/Server/sqlite3
+.vs/MIA/v15/Server/sqlite3
