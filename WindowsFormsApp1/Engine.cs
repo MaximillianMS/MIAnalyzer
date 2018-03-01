@@ -1,9 +1,11 @@
 ﻿using MyConversion;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 namespace MyConversion
 {
@@ -89,7 +91,9 @@ namespace MIAnalyzer
             var res = new List<Trial>();
             var pressedchars = from t in this.KeyLogger_Key.Zip(this.KeyLogger_IsKeyDown.Zip(this.KeyLogger_UnixTime, (a, b) => Tuple.Create(a, b)), (i, j) => Tuple.Create(i, j.Item1, j.Item2)) where (t.Item2 == true) select t;
             var strPressedChars = (new StringBuilder()).Append(pressedchars.Select(i=>i.Item1).ToArray()).ToString();
-            var indexes = strPressedChars.AllIndexesOf(this.PassPhrase);
+            //Parsing is not key-sensitive
+            var indexes = (Program._USEHARDCODE)?strPressedChars.ToUpper().AllIndexesOf(this.PassPhrase.ToUpper())
+                :strPressedChars.AllIndexesOf(this.PassPhrase);
             for (int ind =0;ind<indexes.Count;ind++)
             {
                 var index = indexes[ind];
@@ -100,8 +104,24 @@ namespace MIAnalyzer
                 trial.intLoggerEndRowNum = trial.intLoggerStartRowNum + 2 * this.PassPhrase.Length - 1;
                 var dStartLogTime = this.KeyLogger_UnixTime[trial.intLoggerStartRowNum];
                 var dEndLogTime = this.KeyLogger_UnixTime[trial.intLoggerEndRowNum];
-                var dStartMotionTime = this.Motion_UnixTime.Last(i => i < dStartLogTime);
-                var dEndMotionTime = this.Motion_UnixTime.First(i => i > dEndLogTime);
+                //Now lets find these times in Motion Data
+                double dStartMotionTime, dEndMotionTime;
+                try
+                {
+                    dStartMotionTime = this.Motion_UnixTime.Last(i => i < dStartLogTime);
+                }
+                catch
+                {
+                    dStartMotionTime = this.Motion_UnixTime[0];
+                }
+                try
+                {
+                    dEndMotionTime = this.Motion_UnixTime.First(i => i > dEndLogTime);
+                }
+                catch
+                {
+                    dEndMotionTime = this.Motion_UnixTime.Last();
+                }
                 trial.intMotionStartRowNum = this.Motion_UnixTime.IndexOf(dStartMotionTime);
                 trial.intMotionEndRowNum = this.Motion_UnixTime.IndexOf(dEndMotionTime);
                 res.Add(trial);
@@ -110,6 +130,9 @@ namespace MIAnalyzer
         }
         static public List<Trial> ParseTrials(TrialSequence trialSequence)
         {
+            return trialSequence.GetTrials();
+            //you should copy function from above because this func is not last version of one
+            throw new NotImplementedException();
             var res = new List<Trial>();
             var pressedchars = from t in trialSequence.KeyLogger_Key.Zip(trialSequence.KeyLogger_IsKeyDown.Zip(trialSequence.KeyLogger_UnixTime, (a, b) => Tuple.Create(a, b)), (i, j) => Tuple.Create(i, j.Item1, j.Item2)) where (t.Item2 == true) select t;
             var indexes = (new StringBuilder()).Append(pressedchars.ToArray()).ToString().AllIndexesOf(trialSequence.PassPhrase);
@@ -257,11 +280,49 @@ namespace MIAnalyzer
                 throw new NotImplementedException();
             }
         }
+        public List<string> GetTrialsInPythonStyle()
+        {
+            List<string> res = new List<string>();
+            var sbMD = new StringBuilder();
+            var sbUsers = new StringBuilder();
+            sbMD.Append( "[");
+            sbUsers.Append("[");
+            var trials = GetTrials();
+            foreach(var trial in trials)
+            {
+                sbMD.Append("[");
+                var accx = "[" + string.Join(", ", trial.ACCX.Select(i => Convert.ToString(i.Item2))) + "], ";
+                sbMD.Append(accx);
+                var accy = "[" + string.Join(", ", trial.ACCY.Select(i => Convert.ToString(i.Item2))) + "], ";
+                sbMD.Append(accy);
+                var accz = "[" + string.Join(", ", trial.ACCZ.Select(i => Convert.ToString(i.Item2))) + "], ";
+                sbMD.Append(accz);
+                var wx = "[" + string.Join(", ", trial.WX.Select(i => Convert.ToString(i.Item2))) + "], ";
+                sbMD.Append(wx);
+                var wy = "[" + string.Join(", ", trial.WY.Select(i => Convert.ToString(i.Item2))) + "], ";
+                sbMD.Append(wy);
+                var wz = "[" + string.Join(", ", trial.WZ.Select(i => Convert.ToString(i.Item2))) + "], ";
+                sbMD.Append(wz);
+                sbMD.Append("], ");
+                sbUsers.Append(trial.User);
+                sbUsers.Append(", ");
+
+            }
+            sbMD.Append( "]");
+            sbUsers.Append("]");
+            res.Add(sbMD.ToString());
+            res.Add(sbUsers.ToString());
+            return res;
+        }
         List<TrialSequence> TrialSeuqences=new List<TrialSequence>();
         public Engine()
         {
             if (Program._USEHARDCODE)
             {
+                var culture = new CultureInfo("ru-RU");
+                culture.NumberFormat.NumberDecimalSeparator = ".";
+                Thread.CurrentThread.CurrentCulture = culture;
+                Thread.CurrentThread.CurrentUICulture = culture;
                 ConnectToDB();
             }
             else
@@ -288,6 +349,13 @@ namespace MIAnalyzer
                 throw new NotImplementedException();
             return keyloggerList[0];
         }
+        char DetectCSVDelimiter(List<string> strlst)
+        {
+            char Delimiter = ',';
+            if (strlst[0].Contains(';'))
+                Delimiter = ';';
+            return Delimiter;
+        }
         MetaData ParseMetaDataFile(List<string> strlst, string FileName)
         {
             var res = new MetaData();
@@ -302,26 +370,36 @@ namespace MIAnalyzer
             var timestampStartIndex = FileName.IndexOfAny("0123456789".ToArray());
             var timestampEndIndex = FileName.LastIndexOfAny("0123456789".ToArray());
             var strTimeStamp = (timestampStartIndex > 0)?FileName.Substring(timestampStartIndex, timestampEndIndex - timestampStartIndex):"0";
-            var dTimeStamp = Convert.ToDouble(strTimeStamp);
+            double dTimeStamp;
+            try
+            {
+                dTimeStamp = Convert.ToDouble(strTimeStamp);
+            }
+            catch
+            {
+                dTimeStamp = 0;
+            }
             res.dateTime = TimeConverter.UnixTimeStampToDateTime(dTimeStamp);
             return res;
         }
         KeyLoggerData ParseKeyLoggerFile(List<string> strlst)
         {
             var res = new KeyLoggerData();
+            var oldFormat = !strlst[0].Contains(',');
+            char Delimiter = DetectCSVDelimiter(strlst);
             foreach (var Line in strlst)
             {
-                if (!"0123456789".Contains(Line[0]))
+                if (!"0123456789".Contains(Line.TrimEnd().Last()))
                     continue;
-                string[] fields = Line.Split(',');
-                switch (fields[1])
+                string[] fields = Line.Split((oldFormat)?' ':Delimiter);
+                switch (fields[(oldFormat)?0:1][0])
                 {
-                    case "+":
+                    case '+':
                         {
                             res.KeyLogger_IsKeyDown.Add(true);
                             break;
                         }
-                    case "-":
+                    case '-':
                         {
                             res.KeyLogger_IsKeyDown.Add(false);
                             break;
@@ -331,19 +409,29 @@ namespace MIAnalyzer
                             continue;
                         }
                 }
-                res.KeyLogger_Key.Add(Convert.ToChar(Convert.ToByte(fields[2])));
-                res.KeyLogger_UnixTime.Add(Convert.ToDouble(fields[0]));
+                res.KeyLogger_Key.Add((oldFormat)?fields[1][0]:Convert.ToChar(Convert.ToByte(fields[2])));
+                res.KeyLogger_UnixTime.Add(Convert.ToDouble((oldFormat) ? fields[2].Split('|')[0] : fields[0]));
             }
             return res;
         }
         MotionData ParseMotionFile(List<string> strlst)
         {
             var res = new MotionData();
-            foreach(var str in strlst)
+            char Delimiter = DetectCSVDelimiter(strlst);
+            foreach (var str in strlst)
             {
                 if (!"0123456789".Contains(str[0]))
                     continue;
-                var splittedStr = str.Split(',');
+                var splittedStr = str.Split(Delimiter);
+                if(splittedStr.Count()>8)
+                {
+                    throw new NotImplementedException("Stop using delimiter \",\" for double numbers and csv's cells.");
+                }
+                //Number column support
+                if(splittedStr.Count()==8)
+                {
+                    splittedStr = splittedStr.Skip(1).ToArray();
+                }
                 res.Motion_UnixTime.Add(Convert.ToDouble(splittedStr[0]));
                 res.Motion_ACCX.Add(Convert.ToDouble(splittedStr[1]));
                 res.Motion_ACCY.Add(Convert.ToDouble(splittedStr[2]));
@@ -357,8 +445,8 @@ namespace MIAnalyzer
         
         void ProcessNewSubFolder(DirectoryInfo Folder)
         {
-            var keyloggerFileInfo = GetFileInSubFolder(Folder, "*keylogger.csv");
-            var motionFileInfo = GetFileInSubFolder(Folder, "*motion.csv");
+            var keyloggerFileInfo = GetFileInSubFolder(Folder, "*keylogger*");
+            var motionFileInfo = GetFileInSubFolder(Folder, "*motion*");
             var metadataFileInfo = GetFileInSubFolder(Folder, "*meta*");
             //ReadMetaData
             var strlstMetaData = FileReader.ReadFile(metadataFileInfo.FullName);

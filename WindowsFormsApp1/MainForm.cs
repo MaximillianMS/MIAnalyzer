@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using OxyPlot;
 using OxyPlot.Series;
 using OxyPlot.Axes;
+using System.IO;
+
 namespace MIAnalyzer
 {
     public partial class MainForm : Form
@@ -137,15 +139,6 @@ namespace MIAnalyzer
         }
         private void scanSavedDataFolderMenuMainFormItem_Click(object sender, EventArgs e)
         {
-            //engine.ScanSavedDataFolder(@"C:\Users\Максим\Downloads\Saved_Data-example");
-            //updateListOfTrials();
-            //return;
-            var fbd = new FolderBrowserDialog();
-            if(fbd.ShowDialog()==DialogResult.OK)
-            {
-                engine.ScanSavedDataFolder(fbd.SelectedPath);
-                updateListOfTrials();
-            }
         }
 
         private void listBoxTrials1_SelectedIndexChanged(object sender, EventArgs e)
@@ -253,6 +246,38 @@ namespace MIAnalyzer
             else
                 e.Effect = DragDropEffects.None;
 
+        }
+
+        private void scanSavedDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //engine.ScanSavedDataFolder(@"C:\Users\Максим\Downloads\Saved_Data-example");
+            //updateListOfTrials();
+            //return;
+            var fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == DialogResult.OK)
+            {
+                engine.ScanSavedDataFolder(fbd.SelectedPath);
+                updateListOfTrials();
+            }
+        }
+
+        private void exportTrialsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var fsd = new SaveFileDialog();
+            if(fsd.ShowDialog() == DialogResult.OK)
+            {
+                var strDataToWrite = engine.GetTrialsInPythonStyle();
+                using (var fs = new FileStream(fsd.FileName, FileMode.Create))
+                {
+                    using (var sw = new StreamWriter(fs))
+                    {
+                        foreach (var str in strDataToWrite)
+                        {
+                            sw.WriteLine(str);
+                        }
+                    }
+                }
+            }
         }
     }
 }

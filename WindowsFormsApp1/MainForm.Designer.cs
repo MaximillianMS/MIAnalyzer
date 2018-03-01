@@ -29,9 +29,6 @@
         private void InitializeComponent()
         {
             this.listBoxTrials1 = new System.Windows.Forms.ListBox();
-            this.scanSavedDataFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuMainForm = new System.Windows.Forms.MenuStrip();
-            this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.panelGraphControl1 = new System.Windows.Forms.Panel();
             this.checkBox6Panel1 = new System.Windows.Forms.CheckBox();
             this.checkBox5Panel1 = new System.Windows.Forms.CheckBox();
@@ -47,75 +44,38 @@
             this.checkBox2Panel2 = new System.Windows.Forms.CheckBox();
             this.checkBox3Panel2 = new System.Windows.Forms.CheckBox();
             this.plotMain = new OxyPlot.WindowsForms.PlotView();
-            this.menuMainForm.SuspendLayout();
-            this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
-            this.toolStripContainer1.SuspendLayout();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.scanSavedDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportTrialsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelGraphControl1.SuspendLayout();
             this.panelGraphControl2.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // listBoxTrials1
             // 
-            this.listBoxTrials1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.listBoxTrials1.Dock = System.Windows.Forms.DockStyle.Right;
             this.listBoxTrials1.FormattingEnabled = true;
-            this.listBoxTrials1.Location = new System.Drawing.Point(747, 12);
+            this.listBoxTrials1.Location = new System.Drawing.Point(611, 24);
             this.listBoxTrials1.Name = "listBoxTrials1";
-            this.listBoxTrials1.Size = new System.Drawing.Size(186, 472);
+            this.listBoxTrials1.Size = new System.Drawing.Size(378, 481);
             this.listBoxTrials1.TabIndex = 0;
             this.listBoxTrials1.SelectedIndexChanged += new System.EventHandler(this.listBoxTrials1_SelectedIndexChanged);
             this.listBoxTrials1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBoxTrials1_MouseDown);
             // 
-            // scanSavedDataFolderToolStripMenuItem
-            // 
-            this.scanSavedDataFolderToolStripMenuItem.Name = "scanSavedDataFolderToolStripMenuItem";
-            this.scanSavedDataFolderToolStripMenuItem.Size = new System.Drawing.Size(143, 19);
-            this.scanSavedDataFolderToolStripMenuItem.Text = "ScanSavedDataFolder";
-            this.scanSavedDataFolderToolStripMenuItem.Click += new System.EventHandler(this.scanSavedDataFolderMenuMainFormItem_Click);
-            // 
-            // menuMainForm
-            // 
-            this.menuMainForm.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.menuMainForm.Dock = System.Windows.Forms.DockStyle.None;
-            this.menuMainForm.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.scanSavedDataFolderToolStripMenuItem});
-            this.menuMainForm.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
-            this.menuMainForm.Location = new System.Drawing.Point(0, 0);
-            this.menuMainForm.Name = "menuMainForm";
-            this.menuMainForm.Size = new System.Drawing.Size(150, 25);
-            this.menuMainForm.TabIndex = 1;
-            this.menuMainForm.Text = "menuMainForm1";
-            // 
-            // toolStripContainer1
-            // 
-            // 
-            // toolStripContainer1.ContentPanel
-            // 
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(150, 150);
-            this.toolStripContainer1.Location = new System.Drawing.Point(8, 8);
-            this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(150, 175);
-            this.toolStripContainer1.TabIndex = 2;
-            this.toolStripContainer1.Text = "toolStripContainer1";
-            // 
-            // toolStripContainer1.TopToolStripPanel
-            // 
-            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.menuMainForm);
-            // 
             // panelGraphControl1
             // 
             this.panelGraphControl1.AllowDrop = true;
-            this.panelGraphControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
             this.panelGraphControl1.Controls.Add(this.checkBox6Panel1);
             this.panelGraphControl1.Controls.Add(this.checkBox5Panel1);
             this.panelGraphControl1.Controls.Add(this.checkBox4Panel1);
             this.panelGraphControl1.Controls.Add(this.checkBox3Panel1);
             this.panelGraphControl1.Controls.Add(this.checkBox2Panel1);
             this.panelGraphControl1.Controls.Add(this.checkBox1Panel1);
-            this.panelGraphControl1.Location = new System.Drawing.Point(12, 393);
+            this.panelGraphControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelGraphControl1.Location = new System.Drawing.Point(0, 409);
             this.panelGraphControl1.Name = "panelGraphControl1";
-            this.panelGraphControl1.Size = new System.Drawing.Size(354, 100);
+            this.panelGraphControl1.Size = new System.Drawing.Size(611, 96);
             this.panelGraphControl1.TabIndex = 4;
             this.panelGraphControl1.DragDrop += new System.Windows.Forms.DragEventHandler(this.panelGraphControl1_DragDrop);
             this.panelGraphControl1.DragEnter += new System.Windows.Forms.DragEventHandler(this.panelGraphControl1_DragEnter);
@@ -185,17 +145,16 @@
             // panelGraphControl2
             // 
             this.panelGraphControl2.AllowDrop = true;
-            this.panelGraphControl2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.panelGraphControl2.Controls.Add(this.checkBox6Panel2);
             this.panelGraphControl2.Controls.Add(this.checkBox5Panel2);
             this.panelGraphControl2.Controls.Add(this.checkBox1Panel2);
             this.panelGraphControl2.Controls.Add(this.checkBox4Panel2);
             this.panelGraphControl2.Controls.Add(this.checkBox2Panel2);
             this.panelGraphControl2.Controls.Add(this.checkBox3Panel2);
-            this.panelGraphControl2.Location = new System.Drawing.Point(411, 393);
+            this.panelGraphControl2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelGraphControl2.Location = new System.Drawing.Point(0, 313);
             this.panelGraphControl2.Name = "panelGraphControl2";
-            this.panelGraphControl2.Size = new System.Drawing.Size(327, 100);
+            this.panelGraphControl2.Size = new System.Drawing.Size(611, 96);
             this.panelGraphControl2.TabIndex = 5;
             this.panelGraphControl2.DragDrop += new System.Windows.Forms.DragEventHandler(this.panelGraphControl2_DragDrop);
             this.panelGraphControl2.DragEnter += new System.Windows.Forms.DragEventHandler(this.panelGraphControl2_DragEnter);
@@ -262,52 +221,70 @@
             // 
             // plotMain
             // 
-            this.plotMain.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.plotMain.Location = new System.Drawing.Point(12, 33);
+            this.plotMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.plotMain.Location = new System.Drawing.Point(0, 24);
             this.plotMain.Margin = new System.Windows.Forms.Padding(0);
             this.plotMain.Name = "plotMain";
             this.plotMain.PanCursor = System.Windows.Forms.Cursors.Hand;
-            this.plotMain.Size = new System.Drawing.Size(726, 357);
+            this.plotMain.Size = new System.Drawing.Size(611, 289);
             this.plotMain.TabIndex = 6;
             this.plotMain.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
             this.plotMain.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
             this.plotMain.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.scanSavedDataToolStripMenuItem,
+            this.exportTrialsToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(989, 24);
+            this.menuStrip1.TabIndex = 7;
+            this.menuStrip1.Text = "menuMainForm";
+            // 
+            // scanSavedDataToolStripMenuItem
+            // 
+            this.scanSavedDataToolStripMenuItem.Name = "scanSavedDataToolStripMenuItem";
+            this.scanSavedDataToolStripMenuItem.Size = new System.Drawing.Size(99, 20);
+            this.scanSavedDataToolStripMenuItem.Text = "ScanSavedData";
+            this.scanSavedDataToolStripMenuItem.Click += new System.EventHandler(this.scanSavedDataToolStripMenuItem_Click);
+            // 
+            // exportTrialsToolStripMenuItem
+            // 
+            this.exportTrialsToolStripMenuItem.Name = "exportTrialsToolStripMenuItem";
+            this.exportTrialsToolStripMenuItem.Size = new System.Drawing.Size(83, 20);
+            this.exportTrialsToolStripMenuItem.Text = "Export Trials";
+            this.exportTrialsToolStripMenuItem.Click += new System.EventHandler(this.exportTrialsToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(945, 500);
+            this.ClientSize = new System.Drawing.Size(989, 505);
             this.Controls.Add(this.plotMain);
             this.Controls.Add(this.panelGraphControl2);
             this.Controls.Add(this.panelGraphControl1);
-            this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.listBoxTrials1);
+            this.Controls.Add(this.menuStrip1);
             this.DoubleBuffered = true;
-            this.MainMenuStrip = this.menuMainForm;
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "MIA Analyzer";
-            this.menuMainForm.ResumeLayout(false);
-            this.menuMainForm.PerformLayout();
-            this.toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
-            this.toolStripContainer1.TopToolStripPanel.PerformLayout();
-            this.toolStripContainer1.ResumeLayout(false);
-            this.toolStripContainer1.PerformLayout();
             this.panelGraphControl1.ResumeLayout(false);
             this.panelGraphControl1.PerformLayout();
             this.panelGraphControl2.ResumeLayout(false);
             this.panelGraphControl2.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
         private System.Windows.Forms.ListBox listBoxTrials1;
-        private System.Windows.Forms.ToolStripMenuItem scanSavedDataFolderToolStripMenuItem;
-        private System.Windows.Forms.MenuStrip menuMainForm;
-        private System.Windows.Forms.ToolStripContainer toolStripContainer1;
         private System.Windows.Forms.Panel panelGraphControl1;
         private System.Windows.Forms.Panel panelGraphControl2;
         private System.Windows.Forms.CheckBox checkBox6Panel1;
@@ -323,6 +300,9 @@
         private System.Windows.Forms.CheckBox checkBox2Panel2;
         private System.Windows.Forms.CheckBox checkBox3Panel2;
         private OxyPlot.WindowsForms.PlotView plotMain;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem scanSavedDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportTrialsToolStripMenuItem;
     }
 }
 
