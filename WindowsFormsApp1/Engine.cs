@@ -9,6 +9,33 @@ using System.Threading;
 using System.Threading.Tasks;
 namespace MyConversion
 {
+    public static class ForIEnumarable
+    {
+        public static IEnumerable<TResult> SuperZip<T, TResult>(this IEnumerable<T> source, Func<T[], TResult> func, params IEnumerable<T>[] other)
+        {
+                var enumList = other.Select(i => i.GetEnumerator()).ToList();
+                enumList.Insert(0, source.GetEnumerator());
+                {
+                    while (enumList.All(i=>i.MoveNext()))
+                        yield return func(enumList.Select(i=>i.Current).ToArray());
+                }
+                enumList.ForEach(i => i.Dispose());           
+        }
+        public static IEnumerable<TResult> ZipThree<T1, T2, T3, TResult>(
+        this IEnumerable<T1> source,
+        IEnumerable<T2> second,
+        IEnumerable<T3> third,
+        Func<T1, T2, T3, TResult> func)
+        {
+            using (var e1 = source.GetEnumerator())
+            using (var e2 = second.GetEnumerator())
+            using (var e3 = third.GetEnumerator())
+            {
+                while (e1.MoveNext() && e2.MoveNext() && e3.MoveNext())
+                    yield return func(e1.Current, e2.Current, e3.Current);
+            }
+        }
+    }
     public static class ForStrings
     {
         public static List<int> AllIndexesOf(this string str, string value)
@@ -310,6 +337,33 @@ namespace MIAnalyzer
             }
             sbMD.Append( "]");
             sbUsers.Append("]");
+            res.Add(sbMD.ToString());
+            res.Add(sbUsers.ToString());
+            return res;
+        }
+        public List<string> GetTrialsCSV()
+        {
+            List<string> res = new List<string>();
+            char Delimiter = ';';
+            var sbMD = new StringBuilder();
+            var sbUsers = new StringBuilder();
+            sbUsers.Append("PLACE HEADER HERE\r\n");
+            var trials = GetTrials();
+            foreach (var trial in trials)
+            {
+                sbMD.Append("PLACE HEADER HERE\r\n");
+                var csvMD = trial.ACCX.Select(i => i.Item2).SuperZip(i =>
+                  string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}\r\n", Delimiter, i[0], i[1], i[2], i[3], i[4], i[5]),
+                  trial.ACCY.Select(i => i.Item2),
+                  trial.ACCZ.Select(i => i.Item2),
+                  trial.WX.Select(i => i.Item2),
+                  trial.WY.Select(i => i.Item2),
+                  trial.WZ.Select(i => i.Item2)
+                    );
+                csvMD.All(i => { sbMD.Append(i); return true; });
+                sbUsers.Append(string.Format("{1}{0}\r\n", Delimiter, trial.User));
+
+            }
             res.Add(sbMD.ToString());
             res.Add(sbUsers.ToString());
             return res;

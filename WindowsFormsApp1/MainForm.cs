@@ -264,16 +264,29 @@ namespace MIAnalyzer
         private void exportTrialsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var fsd = new SaveFileDialog();
-            if(fsd.ShowDialog() == DialogResult.OK)
+            fsd.Title = "Save Motion Data from all trials into csv file";
+            fsd.Filter = "Csv Files(*.csv) | *.csv | Text Files(*.txt) | *.txt | All Files(*.*) | *.*";
+            fsd.OverwritePrompt = true;
+            fsd.AddExtension = true;
+            if (fsd.ShowDialog() == DialogResult.OK)
             {
-                var strDataToWrite = engine.GetTrialsInPythonStyle();
+                var strDataToWrite = engine.GetTrialsCSV();
                 using (var fs = new FileStream(fsd.FileName, FileMode.Create))
                 {
                     using (var sw = new StreamWriter(fs))
                     {
-                        foreach (var str in strDataToWrite)
+                            sw.WriteLine(strDataToWrite[0]);
+                    }
+                }
+
+                fsd.Title = "Save Users from all trials into csv file";
+                if (fsd.ShowDialog() == DialogResult.OK)
+                {
+                    using (var fs = new FileStream(fsd.FileName, FileMode.Create))
+                    {
+                        using (var sw = new StreamWriter(fs))
                         {
-                            sw.WriteLine(str);
+                            sw.WriteLine(strDataToWrite[1]);
                         }
                     }
                 }
