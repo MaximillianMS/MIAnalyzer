@@ -79,6 +79,12 @@
     <Compile Include="Engine.cs" />
     <Compile Include="FileReader.cs" />
     <Compile Include="FolderIndexer.cs" />
+    <Compile Include="HowMuchCounts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HowMuchCounts.Designer.cs">
+      <DependentUpon>HowMuchCounts.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,6 +93,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="HowMuchCounts.resx">
+      <DependentUpon>HowMuchCounts.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

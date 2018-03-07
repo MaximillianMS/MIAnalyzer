@@ -263,6 +263,25 @@ namespace MIAnalyzer
 
         private void exportTrialsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            var cdg = new HowMuchCounts();
+            int counts = 0;
+            if (cdg.ShowDialog() == DialogResult.OK)
+            {
+                var tb = cdg.Controls.Find("textBoxInput", true);
+                if(tb[0].Text.ToArray().All(i=>"0123456789".Contains(i)))
+                {
+                    try
+                    {
+                        counts = Convert.ToInt32(tb[0].Text);
+                    }
+                    catch
+                    {
+                        counts = 0;
+                    }
+                }
+            }
+            else
+                return;
             var fsd = new SaveFileDialog();
             fsd.Title = "Save Motion Data from all trials into csv file";
             fsd.Filter = "Csv Files(*.csv) | *.csv | Text Files(*.txt) | *.txt | All Files(*.*) | *.*";
@@ -270,7 +289,7 @@ namespace MIAnalyzer
             fsd.AddExtension = true;
             if (fsd.ShowDialog() == DialogResult.OK)
             {
-                var strDataToWrite = engine.GetTrialsCSV();
+                var strDataToWrite = engine.GetTrialsCSV(counts);
                 using (var fs = new FileStream(fsd.FileName, FileMode.Create))
                 {
                     using (var sw = new StreamWriter(fs))

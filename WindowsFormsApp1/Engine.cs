@@ -341,27 +341,46 @@ namespace MIAnalyzer
             res.Add(sbUsers.ToString());
             return res;
         }
-        public List<string> GetTrialsCSV()
+        public List<string> GetTrialsCSV(int Counts)
         {
             List<string> res = new List<string>();
-            char Delimiter = ';';
+            char Delimiter = ',';
             var sbMD = new StringBuilder();
             var sbUsers = new StringBuilder();
-            sbUsers.Append("PLACE HEADER HERE\r\n");
+            var usersHeader = "";
+            var mdHeader = "Number, time(ms), accx(m/s^2), accy, accz, wx(rad/s), wy, wz\r\n";
+            sbUsers.Append(usersHeader);
             var trials = GetTrials();
             foreach (var trial in trials)
             {
-                sbMD.Append("PLACE HEADER HERE\r\n");
-                var csvMD = trial.ACCX.Select(i => i.Item2).SuperZip(i =>
-                  string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}{0}\r\n", Delimiter, i[0], i[1], i[2], i[3], i[4], i[5]),
-                  trial.ACCY.Select(i => i.Item2),
-                  trial.ACCZ.Select(i => i.Item2),
-                  trial.WX.Select(i => i.Item2),
-                  trial.WY.Select(i => i.Item2),
-                  trial.WZ.Select(i => i.Item2)
+                sbMD.Append(mdHeader);
+                List<double> preparedACCX, preparedACCY, preparedACCZ, preparedWX, preparedWY, preparedWZ;
+                    preparedACCX = trial.ACCX.Select(i => i.Item2).Take(Counts).ToList();
+                    preparedACCY = trial.ACCY.Select(i => i.Item2).Take(Counts).ToList();
+                    preparedACCZ = trial.ACCZ.Select(i => i.Item2).Take(Counts).ToList();
+                    preparedWX = trial.WX.Select(i => i.Item2).Take(Counts).ToList();
+                    preparedWY = trial.WY.Select(i => i.Item2).Take(Counts).ToList();
+                    preparedWZ = trial.WZ.Select(i => i.Item2).Take(Counts).ToList();
+                if (Counts > trial.ACCX.Count)
+                {
+                    preparedACCX.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
+                    preparedACCY.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
+                    preparedACCZ.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
+                    preparedWX.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
+                    preparedWY.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
+                    preparedWZ.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
+                }
+                var csvMD = preparedACCX.SuperZip(i =>
+                  string.Format("{7}{0}{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}\r\n", Delimiter, i[0], i[1], i[2], i[3], i[4], i[5], i[6]),
+                  preparedACCY,
+                  preparedACCZ,
+                  preparedWX,
+                  preparedWY,
+                  preparedWZ,
+                  Enumerable.Range(0, Counts).ToList().ConvertAll(i => (double)i)
                     );
                 csvMD.All(i => { sbMD.Append(i); return true; });
-                sbUsers.Append(string.Format("{1}{0}\r\n", Delimiter, trial.User));
+                sbUsers.Append(string.Format("{1}{0}", Delimiter, trial.User));
 
             }
             res.Add(sbMD.ToString());
