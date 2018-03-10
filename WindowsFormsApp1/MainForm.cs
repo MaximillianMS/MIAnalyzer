@@ -90,7 +90,6 @@ namespace MIAnalyzer
         void CreateEngine()
         {
             engine = new Engine();
-            engine.ConnectToDB();
         }
         
 
@@ -289,7 +288,7 @@ namespace MIAnalyzer
             fsd.AddExtension = true;
             if (fsd.ShowDialog() == DialogResult.OK)
             {
-                var strDataToWrite = engine.GetTrialsCSV(counts);
+                var strDataToWrite = engine.GetTrialsCSV(counts, ((CheckBox)cdg.Controls.Find("checkBoxGetSequences", true)[0]).Checked, counts<0);
                 using (var fs = new FileStream(fsd.FileName, FileMode.Create))
                 {
                     using (var sw = new StreamWriter(fs))

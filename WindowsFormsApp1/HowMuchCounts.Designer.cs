@@ -30,6 +30,7 @@
         {
             this.textBoxInput = new System.Windows.Forms.TextBox();
             this.buttonOK = new System.Windows.Forms.Button();
+            this.checkBoxGetSequences = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // textBoxInput
@@ -43,18 +44,29 @@
             // buttonOK
             // 
             this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOK.Location = new System.Drawing.Point(99, 62);
+            this.buttonOK.Location = new System.Drawing.Point(95, 71);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(75, 23);
             this.buttonOK.TabIndex = 1;
             this.buttonOK.Text = "OK";
             this.buttonOK.UseVisualStyleBackColor = true;
             // 
+            // checkBoxGetSequences
+            // 
+            this.checkBoxGetSequences.AutoSize = true;
+            this.checkBoxGetSequences.Location = new System.Drawing.Point(79, 48);
+            this.checkBoxGetSequences.Name = "checkBoxGetSequences";
+            this.checkBoxGetSequences.Size = new System.Drawing.Size(114, 17);
+            this.checkBoxGetSequences.TabIndex = 2;
+            this.checkBoxGetSequences.Text = "Get All Sequences";
+            this.checkBoxGetSequences.UseVisualStyleBackColor = true;
+            // 
             // HowMuchCounts
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 100);
+            this.Controls.Add(this.checkBoxGetSequences);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.textBoxInput);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
@@ -70,5 +82,6 @@
 
         private System.Windows.Forms.TextBox textBoxInput;
         private System.Windows.Forms.Button buttonOK;
+        private System.Windows.Forms.CheckBox checkBoxGetSequences;
     }
 }

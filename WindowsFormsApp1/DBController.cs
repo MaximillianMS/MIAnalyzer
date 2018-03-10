@@ -152,7 +152,8 @@ namespace MIAnalyzer
         }
         public ConnectionState ConnectToDB(DBConnectionParams ConnectionParams)
         {
-
+            if (Program._USEHARDCODE)
+                return ConnectionState.Connecting;
             switch (ConnectionParams.DBType)
             {
                 case DBType.SQLite:

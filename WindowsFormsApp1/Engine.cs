@@ -189,6 +189,17 @@ namespace MIAnalyzer
         public int TrialNumber;
         public int intLoggerStartRowNum, intLoggerEndRowNum;
         public int intMotionStartRowNum, intMotionEndRowNum;
+        public Trial(Trial trial)
+        {
+            this.LoadDataFromTrialSeq(trial);
+            this.SequenceGUID = trial.SequenceGUID;
+            this.TrialNumber = trial.TrialNumber;
+            this.intLoggerStartRowNum = trial.intLoggerStartRowNum;
+            this.intLoggerEndRowNum = trial.intLoggerEndRowNum;
+            this.intMotionStartRowNum = trial.intMotionStartRowNum;
+            this.intMotionEndRowNum = trial.intMotionEndRowNum;
+        }
+        public Trial() { }
         public void LoadDataFromTrialSeq(TrialSequence trialSequence)
         {
             this.dateTime = trialSequence.dateTime;
@@ -307,6 +318,24 @@ namespace MIAnalyzer
                 throw new NotImplementedException();
             }
         }
+        public List<Trial> GetSequences()
+        {
+            var res = new List<Trial>();
+            var trials = GetTrials();
+            foreach(var trial in trials)
+            {
+                foreach(var r in res)
+                {
+                    if (r.SequenceGUID == trial.SequenceGUID)
+                        break;
+                }
+                var modifiedTrial = new Trial(trial);
+                modifiedTrial.intMotionStartRowNum = 0;
+                modifiedTrial.intMotionEndRowNum = modifiedTrial.Motion_ACCX.Count - 1;
+                res.Add(modifiedTrial);
+            }
+            return res;
+        }
         public List<string> GetTrialsInPythonStyle()
         {
             List<string> res = new List<string>();
@@ -341,28 +370,31 @@ namespace MIAnalyzer
             res.Add(sbUsers.ToString());
             return res;
         }
-        public List<string> GetTrialsCSV(int Counts)
+        public List<string> GetTrialsCSV(int Counts, bool GetSequences=false, bool IgnoreCounts = false)
         {
+            if (Counts <= 0)
+                IgnoreCounts = true;
             List<string> res = new List<string>();
             char Delimiter = ',';
             var sbMD = new StringBuilder();
             var sbUsers = new StringBuilder();
-            var usersHeader = "";
             var mdHeader = "Number, time(ms), accx(m/s^2), accy, accz, wx(rad/s), wy, wz\r\n";
-            sbUsers.Append(usersHeader);
-            var trials = GetTrials();
+            var trials = (GetSequences) ? this.GetSequences() : GetTrials();
             foreach (var trial in trials)
             {
                 sbMD.Append(mdHeader);
-                List<double> preparedACCX, preparedACCY, preparedACCZ, preparedWX, preparedWY, preparedWZ;
-                    preparedACCX = trial.ACCX.Select(i => i.Item2).Take(Counts).ToList();
-                    preparedACCY = trial.ACCY.Select(i => i.Item2).Take(Counts).ToList();
-                    preparedACCZ = trial.ACCZ.Select(i => i.Item2).Take(Counts).ToList();
-                    preparedWX = trial.WX.Select(i => i.Item2).Take(Counts).ToList();
-                    preparedWY = trial.WY.Select(i => i.Item2).Take(Counts).ToList();
-                    preparedWZ = trial.WZ.Select(i => i.Item2).Take(Counts).ToList();
+                var currentCounts = (IgnoreCounts) ?trial.ACCX.Count: Counts;
+                List<double> preparedUnixTime, preparedACCX, preparedACCY, preparedACCZ, preparedWX, preparedWY, preparedWZ;
+                    preparedUnixTime = trial.Motion_UnixTime.Skip(trial.intMotionStartRowNum).Take(currentCounts).ToList();
+                    preparedACCX = trial.ACCX.Select(i => i.Item2).Take(currentCounts).ToList();
+                    preparedACCY = trial.ACCY.Select(i => i.Item2).Take(currentCounts).ToList();
+                    preparedACCZ = trial.ACCZ.Select(i => i.Item2).Take(currentCounts).ToList();
+                    preparedWX = trial.WX.Select(i => i.Item2).Take(currentCounts).ToList();
+                    preparedWY = trial.WY.Select(i => i.Item2).Take(currentCounts).ToList();
+                    preparedWZ = trial.WZ.Select(i => i.Item2).Take(currentCounts).ToList();
                 if (Counts > trial.ACCX.Count)
                 {
+                    preparedUnixTime.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
                     preparedACCX.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
                     preparedACCY.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
                     preparedACCZ.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
@@ -371,18 +403,24 @@ namespace MIAnalyzer
                     preparedWZ.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
                 }
                 var csvMD = preparedACCX.SuperZip(i =>
-                  string.Format("{7}{0}{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}\r\n", Delimiter, i[0], i[1], i[2], i[3], i[4], i[5], i[6]),
+                  string.Format("{8}{0}{7}{0}{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}\r\n", Delimiter, i[0], i[1], i[2], i[3], i[4], i[5], i[6], i[7]),
                   preparedACCY,
                   preparedACCZ,
                   preparedWX,
                   preparedWY,
                   preparedWZ,
-                  Enumerable.Range(0, Counts).ToList().ConvertAll(i => (double)i)
+                  preparedUnixTime,
+                  Enumerable.Range(0, currentCounts).ToList().ConvertAll(i => (double)i)
                     );
                 csvMD.All(i => { sbMD.Append(i); return true; });
                 sbUsers.Append(string.Format("{1}{0}", Delimiter, trial.User));
 
             }
+            int userCount = sbUsers.ToString().Sum(i => (i == Delimiter) ? 1 : 0);
+            var sbUsersHeader = new StringBuilder();
+            Enumerable.Range(0, userCount).Select(i => string.Format("username{0}", i+1)).Zip(Enumerable.Repeat(Delimiter, userCount), (i, j) => i + j).All( i => {sbUsersHeader.Append(i); return true; });
+            var usersHeader = sbUsersHeader.ToString().TrimEnd(Delimiter)+"\r\n";
+            sbUsers.Insert(0,usersHeader);
             res.Add(sbMD.ToString());
             res.Add(sbUsers.ToString());
             return res;
