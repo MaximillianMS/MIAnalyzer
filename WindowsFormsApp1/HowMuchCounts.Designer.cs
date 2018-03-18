@@ -31,6 +31,7 @@
             this.textBoxInput = new System.Windows.Forms.TextBox();
             this.buttonOK = new System.Windows.Forms.Button();
             this.checkBoxGetSequences = new System.Windows.Forms.CheckBox();
+            this.checkBoxEmptySeq = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // textBoxInput
@@ -44,7 +45,7 @@
             // buttonOK
             // 
             this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOK.Location = new System.Drawing.Point(95, 71);
+            this.buttonOK.Location = new System.Drawing.Point(100, 92);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(75, 23);
             this.buttonOK.TabIndex = 1;
@@ -61,11 +62,24 @@
             this.checkBoxGetSequences.Text = "Get All Sequences";
             this.checkBoxGetSequences.UseVisualStyleBackColor = true;
             // 
+            // checkBoxEmptySeq
+            // 
+            this.checkBoxEmptySeq.AutoSize = true;
+            this.checkBoxEmptySeq.Checked = true;
+            this.checkBoxEmptySeq.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxEmptySeq.Location = new System.Drawing.Point(40, 69);
+            this.checkBoxEmptySeq.Name = "checkBoxEmptySeq";
+            this.checkBoxEmptySeq.Size = new System.Drawing.Size(213, 17);
+            this.checkBoxEmptySeq.TabIndex = 3;
+            this.checkBoxEmptySeq.Text = "Include sequences without parced trials";
+            this.checkBoxEmptySeq.UseVisualStyleBackColor = true;
+            // 
             // HowMuchCounts
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 100);
+            this.ClientSize = new System.Drawing.Size(284, 127);
+            this.Controls.Add(this.checkBoxEmptySeq);
             this.Controls.Add(this.checkBoxGetSequences);
             this.Controls.Add(this.buttonOK);
             this.Controls.Add(this.textBoxInput);
@@ -83,5 +97,6 @@
         private System.Windows.Forms.TextBox textBoxInput;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.CheckBox checkBoxGetSequences;
+        private System.Windows.Forms.CheckBox checkBoxEmptySeq;
     }
 }

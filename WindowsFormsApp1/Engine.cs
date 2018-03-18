@@ -307,6 +307,7 @@ namespace MIAnalyzer
         /// Hardcoded for storing trials in app memory
         /// </summary>
         List<Trial> Trials=new List<Trial>();
+        List<TrialSequence> TrialSequences = new List<TrialSequence>();
         public List<Trial> GetTrials()
         {
             if(Program._USEHARDCODE)
@@ -318,10 +319,29 @@ namespace MIAnalyzer
                 throw new NotImplementedException();
             }
         }
-        public List<Trial> GetSequences()
+        public List<Trial> GetSequences(bool ExportEmpty=true)
         {
             var res = new List<Trial>();
-            var trials = GetTrials();
+            if (Program._USEHARDCODE)
+            {
+                foreach(var trialSequence in TrialSequences )
+                {
+                    var trCount = trialSequence.GetTrials().Count;
+                    if (trCount > 0 || ExportEmpty)
+                    {
+                        var modifiedTrial = new Trial();
+                        modifiedTrial.LoadDataFromTrialSeq(trialSequence);
+                        modifiedTrial.intMotionStartRowNum = 0;
+                        modifiedTrial.intMotionEndRowNum = modifiedTrial.Motion_ACCX.Count - 1;
+                        res.Add(modifiedTrial);
+                    }
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+/*            var trials = GetTrials();
             foreach(var trial in trials)
             {
                 foreach(var r in res)
@@ -329,11 +349,8 @@ namespace MIAnalyzer
                     if (r.SequenceGUID == trial.SequenceGUID)
                         break;
                 }
-                var modifiedTrial = new Trial(trial);
-                modifiedTrial.intMotionStartRowNum = 0;
-                modifiedTrial.intMotionEndRowNum = modifiedTrial.Motion_ACCX.Count - 1;
-                res.Add(modifiedTrial);
             }
+*/
             return res;
         }
         public List<string> GetTrialsInPythonStyle()
@@ -370,7 +387,7 @@ namespace MIAnalyzer
             res.Add(sbUsers.ToString());
             return res;
         }
-        public List<string> GetTrialsCSV(int Counts, bool GetSequences=false, bool IgnoreCounts = false)
+        public List<string> GetTrialsCSV(int Counts, bool GetSequences=false, bool IgnoreCounts = false, bool GetEmptySequences = true)
         {
             if (Counts <= 0)
                 IgnoreCounts = true;
@@ -425,7 +442,6 @@ namespace MIAnalyzer
             res.Add(sbUsers.ToString());
             return res;
         }
-        List<TrialSequence> TrialSeuqences=new List<TrialSequence>();
         public Engine()
         {
             if (Program._USEHARDCODE)
@@ -574,10 +590,11 @@ namespace MIAnalyzer
             trialSequence.LoadKeyLoggerData(KeyLogger);
             trialSequence.LoadMotionData(MotionData);
             //
+            Trials.AddRange(trialSequence.GetTrials());
+            //
             if (Program._USEHARDCODE)
             {
-                Trials.AddRange(trialSequence.GetTrials());
-                TrialSeuqences.Add(trialSequence);
+                TrialSequences.Add(trialSequence);
             }
             //
             else
@@ -601,7 +618,7 @@ namespace MIAnalyzer
                 else
                 {
                     Trials.Clear();
-                    TrialSeuqences.Clear();
+                    TrialSequences.Clear();
                 }
             }
             FI.LoadScannedSubFolders(DBC.GetScannedFolders());

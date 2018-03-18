@@ -21,6 +21,7 @@ namespace MIAnalyzer
         GraphParams gp1;
         Trial tr2=null;
         GraphParams gp2;
+        BindingList<Trial> trials = new BindingList<Trial>();
         class GraphParams
         {
             public class BoolProperty
@@ -124,6 +125,7 @@ namespace MIAnalyzer
         public MainForm()
         {
             InitializeComponent();
+            listBoxTrials1.DataSource = trials;
             CreateGraphParams();
             InitGraphPanel(panelGraphControl1, gp1);
             InitGraphPanel(panelGraphControl2, gp2);
@@ -132,9 +134,12 @@ namespace MIAnalyzer
         }
         private void updateListOfTrials()
         {
-            var trials = engine.GetTrials();
-            listBoxTrials1.DataSource = trials;
-            listBoxTrials1.Update();
+            var trialsFromEngine = engine.GetTrials();
+            this.trials.Clear();
+            foreach(var trial in trialsFromEngine)
+            {
+                this.trials.Add(trial);
+            }
         }
         private void scanSavedDataFolderMenuMainFormItem_Click(object sender, EventArgs e)
         {
@@ -215,7 +220,11 @@ namespace MIAnalyzer
 
         private void listBoxTrials1_MouseDown(object sender, MouseEventArgs e)
         {
-            listBoxTrials1.DoDragDrop(listBoxTrials1.SelectedItem, DragDropEffects.Copy| DragDropEffects.Move);
+            if(listBoxTrials1.SelectedItem!=null)
+            {
+                listBoxTrials1.DoDragDrop(listBoxTrials1.SelectedItem, DragDropEffects.Copy | DragDropEffects.Move);
+
+            }
         }
 
         private void panelGraphControl1_DragOver(object sender, DragEventArgs e)
@@ -263,7 +272,7 @@ namespace MIAnalyzer
         private void exportTrialsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var cdg = new HowMuchCounts();
-            int counts = 0;
+            int counts = -1;
             if (cdg.ShowDialog() == DialogResult.OK)
             {
                 var tb = cdg.Controls.Find("textBoxInput", true);
@@ -275,7 +284,7 @@ namespace MIAnalyzer
                     }
                     catch
                     {
-                        counts = 0;
+                        counts = -1;
                     }
                 }
             }
@@ -283,12 +292,14 @@ namespace MIAnalyzer
                 return;
             var fsd = new SaveFileDialog();
             fsd.Title = "Save Motion Data from all trials into csv file";
-            fsd.Filter = "Csv Files(*.csv) | *.csv | Text Files(*.txt) | *.txt | All Files(*.*) | *.*";
+            fsd.Filter = "Csv Files(*.csv)|*.csv|Text Files(*.txt)|*.txt|All Files(*.*)|*.*";
             fsd.OverwritePrompt = true;
             fsd.AddExtension = true;
             if (fsd.ShowDialog() == DialogResult.OK)
             {
-                var strDataToWrite = engine.GetTrialsCSV(counts, ((CheckBox)cdg.Controls.Find("checkBoxGetSequences", true)[0]).Checked, counts<0);
+                var getSequences = ((CheckBox)cdg.Controls.Find("checkBoxGetSequences", true)[0]).Checked;
+                var emptySeq = ((CheckBox)cdg.Controls.Find("checkBoxEmptySeq", true)[0]).Checked;
+                var strDataToWrite = engine.GetTrialsCSV(counts, getSequences, counts<=0, emptySeq);
                 using (var fs = new FileStream(fsd.FileName, FileMode.Create))
                 {
                     using (var sw = new StreamWriter(fs))
