@@ -41,7 +41,8 @@ namespace MyConversion
         public static List<int> AllIndexesOf(this string str, string value)
         {
             if (String.IsNullOrEmpty(value))
-                throw new ArgumentException("the string to find may not be empty", "value");
+                return new List<int>();
+                //throw new ArgumentException("the string to find may not be empty", "value");
             List<int> indexes = new List<int>();
             for (int index = 0; ; index += value.Length)
             {
@@ -113,8 +114,10 @@ namespace MIAnalyzer
         public List<double> KeyLogger_UnixTime { get; set; }
         public List<bool> KeyLogger_IsKeyDown { get; set; }
         public List<char> KeyLogger_Key { get; set; }
-        public List<Trial> GetTrials()
+        public List<Trial> GetTrials(bool AddExtraMD = false)
         {
+            var startDelta = 1000;
+            var endDelta = 1000;
             var res = new List<Trial>();
             var pressedchars = from t in this.KeyLogger_Key.Zip(this.KeyLogger_IsKeyDown.Zip(this.KeyLogger_UnixTime, (a, b) => Tuple.Create(a, b)), (i, j) => Tuple.Create(i, j.Item1, j.Item2)) where (t.Item2 == true) select t;
             var strPressedChars = (new StringBuilder()).Append(pressedchars.Select(i=>i.Item1).ToArray()).ToString();
@@ -129,8 +132,10 @@ namespace MIAnalyzer
                 trial.LoadDataFromTrialSeq(this);
                 trial.intLoggerStartRowNum = this.KeyLogger_UnixTime.IndexOf(pressedchars.ToList()[index].Item3);
                 trial.intLoggerEndRowNum = trial.intLoggerStartRowNum + 2 * this.PassPhrase.Length - 1;
-                var dStartLogTime = this.KeyLogger_UnixTime[trial.intLoggerStartRowNum];
-                var dEndLogTime = this.KeyLogger_UnixTime[trial.intLoggerEndRowNum];
+                if (this.KeyLogger_UnixTime.Count <= trial.intLoggerEndRowNum)
+                    continue;
+                var dStartLogTime = this.KeyLogger_UnixTime[trial.intLoggerStartRowNum] - ((AddExtraMD) ? startDelta : 0);
+                var dEndLogTime = this.KeyLogger_UnixTime[trial.intLoggerEndRowNum] + ((AddExtraMD) ? endDelta : 0);
                 //Now lets find these times in Motion Data
                 double dStartMotionTime, dEndMotionTime;
                 try
@@ -473,7 +478,7 @@ namespace MIAnalyzer
 
             var keyloggerList = Folder.GetFiles(mask);
             if (keyloggerList.Count() != 1)
-                throw new NotImplementedException();
+                return null;
             return keyloggerList[0];
         }
         char DetectCSVDelimiter(List<string> strlst)
@@ -496,7 +501,7 @@ namespace MIAnalyzer
             res.PassPhrase = pass;
             var timestampStartIndex = FileName.IndexOfAny("0123456789".ToArray());
             var timestampEndIndex = FileName.LastIndexOfAny("0123456789".ToArray());
-            var strTimeStamp = (timestampStartIndex > 0)?FileName.Substring(timestampStartIndex, timestampEndIndex - timestampStartIndex):"0";
+            var strTimeStamp = (timestampEndIndex - timestampStartIndex > 0)?FileName.Substring(timestampStartIndex, timestampEndIndex - timestampStartIndex+1):"0";
             double dTimeStamp;
             try
             {
@@ -536,8 +541,10 @@ namespace MIAnalyzer
                             continue;
                         }
                 }
-                res.KeyLogger_Key.Add((oldFormat)?fields[1][0]:Convert.ToChar(Convert.ToByte(fields[2])));
-                res.KeyLogger_UnixTime.Add(Convert.ToDouble((oldFormat) ? fields[2].Split('|')[0] : fields[0]));
+                var key = (oldFormat) ? fields[1][0] : Convert.ToChar(Convert.ToByte(fields[2]));
+                res.KeyLogger_Key.Add(key);
+                var time = Convert.ToDouble((oldFormat) ? fields[2].Split('|')[0] : fields[0]);
+                res.KeyLogger_UnixTime.Add(time);
             }
             return res;
         }
@@ -569,12 +576,14 @@ namespace MIAnalyzer
             }
             return res;
         }
-        
-        void ProcessNewSubFolder(DirectoryInfo Folder)
+
+        void ProcessNewSubFolder(DirectoryInfo Folder, bool AddExtraMD = false)
         {
             var keyloggerFileInfo = GetFileInSubFolder(Folder, "*keylogger*");
             var motionFileInfo = GetFileInSubFolder(Folder, "*motion*");
             var metadataFileInfo = GetFileInSubFolder(Folder, "*meta*");
+            if (keyloggerFileInfo == null || motionFileInfo == null || metadataFileInfo == null)
+                return;
             //ReadMetaData
             var strlstMetaData = FileReader.ReadFile(metadataFileInfo.FullName);
             var MetaData = ParseMetaDataFile(strlstMetaData, metadataFileInfo.Name);
@@ -590,7 +599,7 @@ namespace MIAnalyzer
             trialSequence.LoadKeyLoggerData(KeyLogger);
             trialSequence.LoadMotionData(MotionData);
             //
-            Trials.AddRange(trialSequence.GetTrials());
+            Trials.AddRange(trialSequence.GetTrials(AddExtraMD));
             //
             if (Program._USEHARDCODE)
             {

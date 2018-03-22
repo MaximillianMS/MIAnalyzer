@@ -47,6 +47,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.scanSavedDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportTrialsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addExtraMD1SecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelGraphControl1.SuspendLayout();
             this.panelGraphControl2.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -245,10 +246,14 @@
             // 
             // scanSavedDataToolStripMenuItem
             // 
+            this.scanSavedDataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addExtraMD1SecToolStripMenuItem});
             this.scanSavedDataToolStripMenuItem.Name = "scanSavedDataToolStripMenuItem";
             this.scanSavedDataToolStripMenuItem.Size = new System.Drawing.Size(99, 20);
             this.scanSavedDataToolStripMenuItem.Text = "ScanSavedData";
             this.scanSavedDataToolStripMenuItem.Click += new System.EventHandler(this.scanSavedDataToolStripMenuItem_Click);
+            this.scanSavedDataToolStripMenuItem.MouseLeave += new System.EventHandler(this.scanSavedDataToolStripMenuItem_MouseLeave);
+            this.scanSavedDataToolStripMenuItem.MouseHover += new System.EventHandler(this.scanSavedDataToolStripMenuItem_MouseHover);
             // 
             // exportTrialsToolStripMenuItem
             // 
@@ -256,6 +261,14 @@
             this.exportTrialsToolStripMenuItem.Size = new System.Drawing.Size(83, 20);
             this.exportTrialsToolStripMenuItem.Text = "Export Trials";
             this.exportTrialsToolStripMenuItem.Click += new System.EventHandler(this.exportTrialsToolStripMenuItem_Click);
+            // 
+            // addExtraMD1SecToolStripMenuItem
+            // 
+            this.addExtraMD1SecToolStripMenuItem.Name = "addExtraMD1SecToolStripMenuItem";
+            this.addExtraMD1SecToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.addExtraMD1SecToolStripMenuItem.Text = "Add Extra MD (1 sec)";
+            this.addExtraMD1SecToolStripMenuItem.Click += new System.EventHandler(this.addExtraMD1SecToolStripMenuItem_Click);
+            this.addExtraMD1SecToolStripMenuItem.MouseLeave += new System.EventHandler(this.addExtraMD1SecToolStripMenuItem_MouseLeave);
             // 
             // MainForm
             // 
@@ -303,6 +316,7 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem scanSavedDataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportTrialsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addExtraMD1SecToolStripMenuItem;
     }
 }
 
