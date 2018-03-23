@@ -47,7 +47,8 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.scanSavedDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportTrialsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addExtraMD1SecToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearTrialsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelGraphControl1.SuspendLayout();
             this.panelGraphControl2.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -237,7 +238,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.scanSavedDataToolStripMenuItem,
-            this.exportTrialsToolStripMenuItem});
+            this.exportTrialsToolStripMenuItem,
+            this.clearTrialsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(989, 24);
@@ -246,14 +248,10 @@
             // 
             // scanSavedDataToolStripMenuItem
             // 
-            this.scanSavedDataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addExtraMD1SecToolStripMenuItem});
             this.scanSavedDataToolStripMenuItem.Name = "scanSavedDataToolStripMenuItem";
             this.scanSavedDataToolStripMenuItem.Size = new System.Drawing.Size(99, 20);
             this.scanSavedDataToolStripMenuItem.Text = "ScanSavedData";
             this.scanSavedDataToolStripMenuItem.Click += new System.EventHandler(this.scanSavedDataToolStripMenuItem_Click);
-            this.scanSavedDataToolStripMenuItem.MouseLeave += new System.EventHandler(this.scanSavedDataToolStripMenuItem_MouseLeave);
-            this.scanSavedDataToolStripMenuItem.MouseHover += new System.EventHandler(this.scanSavedDataToolStripMenuItem_MouseHover);
             // 
             // exportTrialsToolStripMenuItem
             // 
@@ -262,13 +260,20 @@
             this.exportTrialsToolStripMenuItem.Text = "Export Trials";
             this.exportTrialsToolStripMenuItem.Click += new System.EventHandler(this.exportTrialsToolStripMenuItem_Click);
             // 
-            // addExtraMD1SecToolStripMenuItem
+            // clearTrialsToolStripMenuItem
             // 
-            this.addExtraMD1SecToolStripMenuItem.Name = "addExtraMD1SecToolStripMenuItem";
-            this.addExtraMD1SecToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-            this.addExtraMD1SecToolStripMenuItem.Text = "Add Extra MD (1 sec)";
-            this.addExtraMD1SecToolStripMenuItem.Click += new System.EventHandler(this.addExtraMD1SecToolStripMenuItem_Click);
-            this.addExtraMD1SecToolStripMenuItem.MouseLeave += new System.EventHandler(this.addExtraMD1SecToolStripMenuItem_MouseLeave);
+            this.clearTrialsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearToolStripMenuItem});
+            this.clearTrialsToolStripMenuItem.Name = "clearTrialsToolStripMenuItem";
+            this.clearTrialsToolStripMenuItem.Size = new System.Drawing.Size(93, 20);
+            this.clearTrialsToolStripMenuItem.Text = "Manage Trials";
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(101, 22);
+            this.clearToolStripMenuItem.Text = "Clear";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -283,7 +288,7 @@
             this.DoubleBuffered = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "MIA Analyzer";
+            this.Text = "MIA Analyzer v0.08";
             this.panelGraphControl1.ResumeLayout(false);
             this.panelGraphControl1.PerformLayout();
             this.panelGraphControl2.ResumeLayout(false);
@@ -316,7 +321,8 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem scanSavedDataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportTrialsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem addExtraMD1SecToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearTrialsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
     }
 }
 

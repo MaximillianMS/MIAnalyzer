@@ -72,7 +72,7 @@ namespace MyConversion
 
 namespace MIAnalyzer
 {
-    class TrialSequence
+    public class TrialSequence
     {
         public TrialSequence()
         {
@@ -114,10 +114,10 @@ namespace MIAnalyzer
         public List<double> KeyLogger_UnixTime { get; set; }
         public List<bool> KeyLogger_IsKeyDown { get; set; }
         public List<char> KeyLogger_Key { get; set; }
-        public List<Trial> GetTrials(bool AddExtraMD = false)
+        public List<Trial> GetTrials(bool bAddExtraMD = false, double msExtraMD = 0)
         {
-            var startDelta = 1000;
-            var endDelta = 1000;
+            var startDelta = msExtraMD;
+            var endDelta = msExtraMD;
             var res = new List<Trial>();
             var pressedchars = from t in this.KeyLogger_Key.Zip(this.KeyLogger_IsKeyDown.Zip(this.KeyLogger_UnixTime, (a, b) => Tuple.Create(a, b)), (i, j) => Tuple.Create(i, j.Item1, j.Item2)) where (t.Item2 == true) select t;
             var strPressedChars = (new StringBuilder()).Append(pressedchars.Select(i=>i.Item1).ToArray()).ToString();
@@ -134,8 +134,8 @@ namespace MIAnalyzer
                 trial.intLoggerEndRowNum = trial.intLoggerStartRowNum + 2 * this.PassPhrase.Length - 1;
                 if (this.KeyLogger_UnixTime.Count <= trial.intLoggerEndRowNum)
                     continue;
-                var dStartLogTime = this.KeyLogger_UnixTime[trial.intLoggerStartRowNum] - ((AddExtraMD) ? startDelta : 0);
-                var dEndLogTime = this.KeyLogger_UnixTime[trial.intLoggerEndRowNum] + ((AddExtraMD) ? endDelta : 0);
+                var dStartLogTime = this.KeyLogger_UnixTime[trial.intLoggerStartRowNum] - ((bAddExtraMD) ? startDelta : 0);
+                var dEndLogTime = this.KeyLogger_UnixTime[trial.intLoggerEndRowNum] + ((bAddExtraMD) ? endDelta : 0);
                 //Now lets find these times in Motion Data
                 double dStartMotionTime, dEndMotionTime;
                 try
@@ -188,7 +188,7 @@ namespace MIAnalyzer
         }
     }
     [Serializable]
-    class Trial:TrialSequence
+    public class Trial:TrialSequence
     {
         public string SequenceGUID;
         public int TrialNumber;
@@ -284,25 +284,51 @@ namespace MIAnalyzer
             res = X.Zip(Y, (i, j) => (i, j)).ToList();
             return res;
         }
+        public Trial ExtendTrial(double msExtraMD = 0)
+        {
+            Trial res = new Trial(this);
 
+            var dStartLogTime = res.KeyLogger_UnixTime[res.intLoggerStartRowNum] - msExtraMD;
+            var dEndLogTime = res.KeyLogger_UnixTime[res.intLoggerEndRowNum] + msExtraMD;
+            double dStartMotionTime, dEndMotionTime;
+            try
+            {
+                dStartMotionTime = res.Motion_UnixTime.Last(i => i < dStartLogTime);
+            }
+            catch
+            {
+                dStartMotionTime = res.Motion_UnixTime[0];
+            }
+            try
+            {
+                dEndMotionTime = res.Motion_UnixTime.First(i => i > dEndLogTime);
+            }
+            catch
+            {
+                dEndMotionTime = res.Motion_UnixTime.Last();
+            }
+            res.intMotionStartRowNum = res.Motion_UnixTime.IndexOf(dStartMotionTime);
+            res.intMotionEndRowNum = res.Motion_UnixTime.IndexOf(dEndMotionTime);
+            return res;
+        }
     }
-    struct MetaData
+    public struct MetaData
     {
         public string User;
         public string PassPhrase;
         public DateTime dateTime;
     }
-    class KeyLoggerData
+    public class KeyLoggerData
     {
         public List<double> KeyLogger_UnixTime=new List<double>();
         public List<bool> KeyLogger_IsKeyDown=new List<bool>();
         public List<char> KeyLogger_Key=new List<char>();
     }
-    class MotionData
+    public class MotionData
     {
         public List<double> Motion_UnixTime=new List<double>(), Motion_ACCX = new List<double>(), Motion_ACCY = new List<double>(), Motion_ACCZ = new List<double>(), Motion_WX = new List<double>(), Motion_WY = new List<double>(), Motion_WZ = new List<double>();
     }
-    class Engine
+    public class Engine
     {
         //HARDCODE
         DBConnectionParams SQLiteNearEXE = new DBConnectionParams() { DBType = DBType.SQLite, PathToDBFile = System.Windows.Forms.Application.StartupPath + "BSMDB.db" };
@@ -311,11 +337,11 @@ namespace MIAnalyzer
         /// <summary>
         /// Hardcoded for storing trials in app memory
         /// </summary>
-        List<Trial> Trials=new List<Trial>();
+        List<Trial> Trials = new List<Trial>();
         List<TrialSequence> TrialSequences = new List<TrialSequence>();
         public List<Trial> GetTrials()
         {
-            if(Program._USEHARDCODE)
+            if (Program._USEHARDCODE)
             {
                 return Trials;
             }
@@ -324,12 +350,12 @@ namespace MIAnalyzer
                 throw new NotImplementedException();
             }
         }
-        public List<Trial> GetSequences(bool ExportEmpty=true)
+        public List<Trial> GetSequences(bool ExportEmpty = true)
         {
             var res = new List<Trial>();
             if (Program._USEHARDCODE)
             {
-                foreach(var trialSequence in TrialSequences )
+                foreach (var trialSequence in TrialSequences)
                 {
                     var trCount = trialSequence.GetTrials().Count;
                     if (trCount > 0 || ExportEmpty)
@@ -346,16 +372,16 @@ namespace MIAnalyzer
             {
                 throw new NotImplementedException();
             }
-/*            var trials = GetTrials();
-            foreach(var trial in trials)
-            {
-                foreach(var r in res)
-                {
-                    if (r.SequenceGUID == trial.SequenceGUID)
-                        break;
-                }
-            }
-*/
+            /*            var trials = GetTrials();
+                        foreach(var trial in trials)
+                        {
+                            foreach(var r in res)
+                            {
+                                if (r.SequenceGUID == trial.SequenceGUID)
+                                    break;
+                            }
+                        }
+            */
             return res;
         }
         public List<string> GetTrialsInPythonStyle()
@@ -363,10 +389,10 @@ namespace MIAnalyzer
             List<string> res = new List<string>();
             var sbMD = new StringBuilder();
             var sbUsers = new StringBuilder();
-            sbMD.Append( "[");
+            sbMD.Append("[");
             sbUsers.Append("[");
             var trials = GetTrials();
-            foreach(var trial in trials)
+            foreach (var trial in trials)
             {
                 sbMD.Append("[");
                 var accx = "[" + string.Join(", ", trial.ACCX.Select(i => Convert.ToString(i.Item2))) + "], ";
@@ -386,13 +412,13 @@ namespace MIAnalyzer
                 sbUsers.Append(", ");
 
             }
-            sbMD.Append( "]");
+            sbMD.Append("]");
             sbUsers.Append("]");
             res.Add(sbMD.ToString());
             res.Add(sbUsers.ToString());
             return res;
         }
-        public List<string> GetTrialsCSV(int Counts, bool GetSequences=false, bool IgnoreCounts = false, bool GetEmptySequences = true)
+        public List<string> GetTrialsCSV(int Counts, bool GetSequences = false, bool IgnoreCounts = false, bool GetEmptySequences = true, bool bAddExtraMD = false, double msExtraMD = 0, int intMaxTrialsPerUser = 20)
         {
             if (Counts <= 0)
                 IgnoreCounts = true;
@@ -402,18 +428,36 @@ namespace MIAnalyzer
             var sbUsers = new StringBuilder();
             var mdHeader = "Number, time(ms), accx(m/s^2), accy, accz, wx(rad/s), wy, wz\r\n";
             var trials = (GetSequences) ? this.GetSequences() : GetTrials();
+            var dicUserLimit = new Dictionary<string, int>();
+            if (bAddExtraMD)
+            {
+                trials = trials.Select(i => i.ExtendTrial(msExtraMD)).ToList();
+            }
             foreach (var trial in trials)
             {
+                if (!GetSequences)
+                {
+                    if (dicUserLimit.Keys.Contains(trial.User))
+                    {
+                        dicUserLimit[trial.User]++;
+                    }
+                    else
+                    {
+                        dicUserLimit.Add(trial.User, 1);
+                    }
+                    if (dicUserLimit[trial.User] > intMaxTrialsPerUser)
+                        continue;
+                }
                 sbMD.Append(mdHeader);
-                var currentCounts = (IgnoreCounts) ?trial.ACCX.Count: Counts;
+                var currentCounts = (IgnoreCounts) ? trial.ACCX.Count : Counts;
                 List<double> preparedUnixTime, preparedACCX, preparedACCY, preparedACCZ, preparedWX, preparedWY, preparedWZ;
-                    preparedUnixTime = trial.Motion_UnixTime.Skip(trial.intMotionStartRowNum).Take(currentCounts).ToList();
-                    preparedACCX = trial.ACCX.Select(i => i.Item2).Take(currentCounts).ToList();
-                    preparedACCY = trial.ACCY.Select(i => i.Item2).Take(currentCounts).ToList();
-                    preparedACCZ = trial.ACCZ.Select(i => i.Item2).Take(currentCounts).ToList();
-                    preparedWX = trial.WX.Select(i => i.Item2).Take(currentCounts).ToList();
-                    preparedWY = trial.WY.Select(i => i.Item2).Take(currentCounts).ToList();
-                    preparedWZ = trial.WZ.Select(i => i.Item2).Take(currentCounts).ToList();
+                preparedUnixTime = trial.Motion_UnixTime.Skip(trial.intMotionStartRowNum).Take(currentCounts).ToList();
+                preparedACCX = trial.ACCX.Select(i => i.Item2).Take(currentCounts).ToList();
+                preparedACCY = trial.ACCY.Select(i => i.Item2).Take(currentCounts).ToList();
+                preparedACCZ = trial.ACCZ.Select(i => i.Item2).Take(currentCounts).ToList();
+                preparedWX = trial.WX.Select(i => i.Item2).Take(currentCounts).ToList();
+                preparedWY = trial.WY.Select(i => i.Item2).Take(currentCounts).ToList();
+                preparedWZ = trial.WZ.Select(i => i.Item2).Take(currentCounts).ToList();
                 if (Counts > trial.ACCX.Count)
                 {
                     preparedUnixTime.AddRange(Enumerable.Repeat(0d, Counts - trial.ACCX.Count));
@@ -438,13 +482,13 @@ namespace MIAnalyzer
                 sbUsers.Append(string.Format("{1}{0}", Delimiter, trial.User));
 
             }
-            int userCount = sbUsers.ToString().Sum(i => (i == Delimiter) ? 1 : 0);
+            var userCount = sbUsers.ToString().Sum(i => (i == Delimiter) ? 1 : 0);
             var sbUsersHeader = new StringBuilder();
-            Enumerable.Range(0, userCount).Select(i => string.Format("username{0}", i+1)).Zip(Enumerable.Repeat(Delimiter, userCount), (i, j) => i + j).All( i => {sbUsersHeader.Append(i); return true; });
-            var usersHeader = sbUsersHeader.ToString().TrimEnd(Delimiter)+"\r\n";
-            sbUsers.Insert(0,usersHeader);
+            Enumerable.Range(0, userCount).Select(i => string.Format("username{0}", i + 1)).Zip(Enumerable.Repeat(Delimiter, userCount), (i, j) => i + j).All(i => { sbUsersHeader.Append(i); return true; });
+            var usersHeader = sbUsersHeader.ToString().TrimEnd(Delimiter) + "\r\n";
+            sbUsers.Insert(0, usersHeader);
             res.Add(sbMD.ToString());
-            res.Add(sbUsers.ToString());
+            res.Add(sbUsers.ToString().TrimEnd(Delimiter));
             return res;
         }
         public Engine()
@@ -501,7 +545,7 @@ namespace MIAnalyzer
             res.PassPhrase = pass;
             var timestampStartIndex = FileName.IndexOfAny("0123456789".ToArray());
             var timestampEndIndex = FileName.LastIndexOfAny("0123456789".ToArray());
-            var strTimeStamp = (timestampEndIndex - timestampStartIndex > 0)?FileName.Substring(timestampStartIndex, timestampEndIndex - timestampStartIndex+1):"0";
+            var strTimeStamp = (timestampEndIndex - timestampStartIndex > 0) ? FileName.Substring(timestampStartIndex, timestampEndIndex - timestampStartIndex + 1) : "0";
             double dTimeStamp;
             try
             {
@@ -523,9 +567,9 @@ namespace MIAnalyzer
             {
                 if (!"0123456789".Contains(Line.TrimEnd().Last()))
                     continue;
-                string[] fields = Line.Split((oldFormat)?' ':Delimiter);
+                string[] fields = Line.Split((oldFormat) ? ' ' : Delimiter);
                 bool KeyDown;
-                switch (fields[(oldFormat)?0:1][0])
+                switch (fields[(oldFormat) ? 0 : 1][0])
                 {
                     case '+':
                         {
@@ -543,7 +587,7 @@ namespace MIAnalyzer
                         }
                 }
                 var key = (oldFormat) ? fields[1][0] : Convert.ToChar(Convert.ToByte(fields[2]));
-                if(Program._USEHARDCODE)
+                if (Program._USEHARDCODE)
                 {
                     if (key == 0)
                     {
@@ -567,12 +611,12 @@ namespace MIAnalyzer
                 if (!"0123456789".Contains(str[0]))
                     continue;
                 var splittedStr = str.Split(Delimiter);
-                if(splittedStr.Count()>8)
+                if (splittedStr.Count() > 8)
                 {
                     throw new NotImplementedException("Stop using delimiter \",\" for double numbers and csv's cells.");
                 }
                 //Number column support
-                if(splittedStr.Count()==8)
+                if (splittedStr.Count() == 8)
                 {
                     splittedStr = splittedStr.Skip(1).ToArray();
                 }
@@ -587,7 +631,7 @@ namespace MIAnalyzer
             return res;
         }
 
-        void ProcessNewSubFolder(DirectoryInfo Folder, bool AddExtraMD = false)
+        void ProcessNewSubFolder(DirectoryInfo Folder)
         {
             var keyloggerFileInfo = GetFileInSubFolder(Folder, "*keylogger*");
             var motionFileInfo = GetFileInSubFolder(Folder, "*motion*");
@@ -609,7 +653,7 @@ namespace MIAnalyzer
             trialSequence.LoadKeyLoggerData(KeyLogger);
             trialSequence.LoadMotionData(MotionData);
             //
-            Trials.AddRange(trialSequence.GetTrials(AddExtraMD));
+            Trials.AddRange(trialSequence.GetTrials());
             //
             if (Program._USEHARDCODE)
             {
@@ -621,24 +665,28 @@ namespace MIAnalyzer
             {
                 DBC.MarkFolderAsScanned(Folder);
                 DBC.SaveTrialSequence(trialSequence);
-                foreach(var trial in Trials)
+                foreach (var trial in Trials)
                 {
                     DBC.SaveTrial(trial);
                 }
             }
-                
+
+        }
+        public void ClearTrialsAndSequences()
+        {
+            if (!Program._USEHARDCODE)
+                DBC.ClearAll();
+            else
+            {
+                Trials.Clear();
+                TrialSequences.Clear();
+            }
         }
         public void ScanSavedDataFolder(string PathToFolder, bool NewScan = true)
         {
             if (NewScan)
             {
-                if(!Program._USEHARDCODE)
-                    DBC.ClearAll();
-                else
-                {
-                    Trials.Clear();
-                    TrialSequences.Clear();
-                }
+                ClearTrialsAndSequences();
             }
             FI.LoadScannedSubFolders(DBC.GetScannedFolders());
             var Folders = FileReader.EnumerateSubFolders(PathToFolder);

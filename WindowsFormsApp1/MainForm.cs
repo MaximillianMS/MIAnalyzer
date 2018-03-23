@@ -141,9 +141,6 @@ namespace MIAnalyzer
                 this.trials.Add(trial);
             }
         }
-        private void scanSavedDataFolderMenuMainFormItem_Click(object sender, EventArgs e)
-        {
-        }
 
         private void listBoxTrials1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -261,17 +258,19 @@ namespace MIAnalyzer
             //engine.ScanSavedDataFolder(@"C:\Users\Максим\Downloads\Saved_Data-example");
             //updateListOfTrials();
             //return;
+            if (scanSavedDataToolStripMenuItem.DropDown.IsDropDown)
+                scanSavedDataToolStripMenuItem.DropDown.Close();
             var fbd = new FolderBrowserDialog();
             if (fbd.ShowDialog() == DialogResult.OK)
             {
-                engine.ScanSavedDataFolder(fbd.SelectedPath, addExtraMD1SecToolStripMenuItem.Checked);
+                engine.ScanSavedDataFolder(fbd.SelectedPath);
                 updateListOfTrials();
             }
         }
 
         private void exportTrialsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var cdg = new HowMuchCounts();
+            var cdg = new HowMuchCounts(engine);
             int counts = -1;
             if (cdg.ShowDialog() == DialogResult.OK)
             {
@@ -298,8 +297,12 @@ namespace MIAnalyzer
             if (fsd.ShowDialog() == DialogResult.OK)
             {
                 var getSequences = ((CheckBox)cdg.Controls.Find("checkBoxGetSequences", true)[0]).Checked;
-                var emptySeq = ((CheckBox)cdg.Controls.Find("checkBoxEmptySeq", true)[0]).Checked;
-                var strDataToWrite = engine.GetTrialsCSV(counts, getSequences, counts<=0, emptySeq);
+                var emptySeq = true;//((CheckBox)cdg.Controls.Find("checkBoxEmptySeq", true)[0]).Checked;
+                var bAddExtraMD = !getSequences && ((CheckBox)cdg.Controls.Find("checkBoxExtraMD", true)[0]).Checked;
+                var dExtraCounts = (double)((NumericUpDown)cdg.Controls.Find("numericUpDownExtraCounts", true)[0]).Value;
+                var dFreq = (double)((NumericUpDown)cdg.Controls.Find("numericUpDownFreq", true)[0]).Value;
+                var intMaxTrials = (int)((NumericUpDown)cdg.Controls.Find("numericUpDownMaxTrials", true)[0]).Value;
+                var strDataToWrite = engine.GetTrialsCSV(counts, getSequences, counts<=0, emptySeq, bAddExtraMD, dExtraCounts*1000/dFreq, intMaxTrials);
                 using (var fs = new FileStream(fsd.FileName, FileMode.Create))
                 {
                     using (var sw = new StreamWriter(fs))
@@ -322,26 +325,17 @@ namespace MIAnalyzer
             }
         }
 
-        private void addExtraMD1SecToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            addExtraMD1SecToolStripMenuItem.Checked = (addExtraMD1SecToolStripMenuItem.Checked)?false:true;
-        }
-
-        private void scanSavedDataToolStripMenuItem_MouseHover(object sender, EventArgs e)
-        {
-            var item = this.Controls.Find("menuStrip1", true);
-            scanSavedDataToolStripMenuItem.DropDown.Show(item[0], new Point());
-        }
-
-        private void scanSavedDataToolStripMenuItem_MouseLeave(object sender, EventArgs e)
-        {
-        }
-
         private void addExtraMD1SecToolStripMenuItem_MouseLeave(object sender, EventArgs e)
         {
             if (scanSavedDataToolStripMenuItem.DropDown.IsDropDown)
                 scanSavedDataToolStripMenuItem.DropDown.Close();
 
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            listBoxTrials1.Update();
+            engine.ClearTrialsAndSequences();
         }
     }
 }

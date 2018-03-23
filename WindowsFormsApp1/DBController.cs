@@ -9,8 +9,8 @@ using System.Windows.Forms;
 using System.IO;
 namespace MIAnalyzer
 {
-    enum DBType { SQLite}
-    struct DBConnectionParams
+    public enum DBType { SQLite}
+    public struct DBConnectionParams
     {
         public string PathToDBFile;
         public string Username;
@@ -18,7 +18,7 @@ namespace MIAnalyzer
         public DBType DBType;
         
     }
-    struct Answer
+    public struct Answer
     {
         public List<string> Header;
         public List<List<string>> Body;
