@@ -524,16 +524,17 @@ namespace MIAnalyzer
                 if (!"0123456789".Contains(Line.TrimEnd().Last()))
                     continue;
                 string[] fields = Line.Split((oldFormat)?' ':Delimiter);
+                bool KeyDown;
                 switch (fields[(oldFormat)?0:1][0])
                 {
                     case '+':
                         {
-                            res.KeyLogger_IsKeyDown.Add(true);
+                            KeyDown = true;
                             break;
                         }
                     case '-':
                         {
-                            res.KeyLogger_IsKeyDown.Add(false);
+                            KeyDown = false;
                             break;
                         }
                     default:
@@ -542,8 +543,17 @@ namespace MIAnalyzer
                         }
                 }
                 var key = (oldFormat) ? fields[1][0] : Convert.ToChar(Convert.ToByte(fields[2]));
-                res.KeyLogger_Key.Add(key);
+                if(Program._USEHARDCODE)
+                {
+                    if (key == 0)
+                    {
+                        continue;
+                    }
+                }
                 var time = Convert.ToDouble((oldFormat) ? fields[2].Split('|')[0] : fields[0]);
+                //Add Data
+                res.KeyLogger_IsKeyDown.Add(KeyDown);
+                res.KeyLogger_Key.Add(key);
                 res.KeyLogger_UnixTime.Add(time);
             }
             return res;
