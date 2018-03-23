@@ -334,8 +334,9 @@ namespace MIAnalyzer
 
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            listBoxTrials1.Update();
             engine.ClearTrialsAndSequences();
+            this.trials.Clear();
+            listBoxTrials1.Update();
         }
     }
 }
